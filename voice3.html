@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Text to Speech</title>
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=YYLMTmQ0"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: black;
+      color: #0ff;
+      overflow: hidden;
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      margin-top: 100px;
+    }
+
+    h1 {
+      font-size: 3em;
+      color: #0ff;
+      text-shadow: 0 0 20px #0ff;
+    }
+
+    textarea {
+      width: 80%;
+      height: 100px;
+      background: black;
+      border: 2px solid #0ff;
+      color: #0ff;
+      padding: 10px;
+      font-size: 1.2em;
+      margin-top: 20px;
+      box-shadow: 0 0 10px #0ff;
+    }
+
+    select, button {
+      padding: 10px;
+      font-size: 1em;
+      margin: 10px;
+      background: black;
+      color: #0ff;
+      border: 2px solid #0ff;
+      box-shadow: 0 0 10px #0ff;
+    }
+
+    button:hover {
+      background: #0ff;
+      color: black;
+      box-shadow: 0 0 20px red;
+    }
+
+    .processing {
+      margin-top: 20px;
+      font-size: 1.5em;
+      color: #fff;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="visual"></canvas>
+
+<div class="container">
+  <h1>Make By Mr. Abuhurira</h1>
+
+  <textarea id="textInput" placeholder="এখানে আপনার লেখাটি লিখুন..."></textarea><br>
+
+  <select id="languageSelect">
+    <option value="Bangla">Bangla</option>
+    <option value="English">English</option>
+  </select>
+
+  <select id="voiceSelect">
+    <option value="female">Female</option>
+    <option value="male">Male</option>
+  </select><br>
+
+  <button onclick="speakText()">Tap To 🔊 Speak</button>
+
+  <div class="processing" id="statusText"></div>
+</div>
+
+<script>
+  function speakText() {
+    const text = document.getElementById("textInput").value.trim();
+    const voice = document.getElementById("voiceSelect").value;
+    const language = document.getElementById("languageSelect").value;
+    const status = document.getElementById("statusText");
+
+    if (text === "") {
+      status.innerText = "⚠️ Text likhun!";
+      return;
+    }
+
+    status.innerText = "⏳ Processing...";
+
+    let voiceName = "";
+
+    if (language === "Bangla") {
+      voiceName = voice === "female" ? "Bangla India Female" : "Bangla India Male";
+    } else if (language === "English") {
+      voiceName = voice === "female" ? "UK English Female" : "UK English Male";
+    }
+
+    setTimeout(() => {
+      responsiveVoice.speak(text, voiceName);
+      status.innerText = "✅ Done! Play Started...";
+    }, 1500);
+  }
+
+  // Neon Live Sound Background (Canvas Animation)
+  const canvas = document.getElementById("visual");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  let waveOffset = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+    ctx.strokeStyle = '#0ff';
+    ctx.lineWidth = 2;
+
+    for (let i = 0; i < canvas.width; i++) {
+      const y = canvas.height / 2 + Math.sin(i * 0.01 + waveOffset) * 100;
+      if (i === 0) ctx.moveTo(i, y);
+      else ctx.lineTo(i, y);
+    }
+
+    ctx.stroke();
+    waveOffset += 0.05;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+</script>
+
+</body>
+</html>
