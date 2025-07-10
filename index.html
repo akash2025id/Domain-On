@@ -1,153 +1,2203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Text to Speech</title>
-  <link rel="icon" href="favicon.png" type="image/png" />
-  <script src="https://code.responsivevoice.org/responsivevoice.js?key=YYLMTmQ0"></script>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', sans-serif;
-      background: black;
-      color: #0ff;
-      overflow: hidden;
-    }
-
-    .container {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      margin-top: 100px;
-    }
-
-    h1 {
-      font-size: 3em;
-      color: #0ff;
-      text-shadow: 0 0 20px #0ff;
-    }
-
-    textarea {
-      width: 80%;
-      height: 100px;
-      background: black;
-      border: 2px solid #0ff;
-      color: #0ff;
-      padding: 10px;
-      font-size: 1.2em;
-      margin-top: 20px;
-      box-shadow: 0 0 10px #0ff;
-    }
-
-    select, button {
-      padding: 10px;
-      font-size: 1em;
-      margin: 10px;
-      background: black;
-      color: #0ff;
-      border: 2px solid #0ff;
-      box-shadow: 0 0 10px #0ff;
-    }
-
-    button:hover {
-      background: #0ff;
-      color: black;
-      box-shadow: 0 0 20px red;
-    }
-
-    .processing {
-      margin-top: 20px;
-      font-size: 1.5em;
-      color: #fff;
-    }
-
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Game - Admin Panel</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Auth Pages */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+        }
+        
+        .auth-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .auth-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2a5298;
+        }
+        
+        .auth-form .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .auth-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .auth-form input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .auth-form button {
+            width: 100%;
+            padding: 12px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .auth-form button:hover {
+            background: #1e3c72;
+        }
+        
+        .auth-switch {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .auth-switch a {
+            color: #2a5298;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        /* Header */
+        .header {
+            background: #2a5298;
+            color: white;
+            padding: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-left: 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        
+        .balance {
+            background: #1e3c72;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        .logout-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .logout-btn:hover {
+            background: #ff6b81;
+        }
+        
+        /* Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 20px;
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-menu a {
+            display: block;
+            padding: 10px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: #2a5298;
+            color: white;
+        }
+        
+        .main-content {
+            background: white;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .game-thumbnail {
+            position: relative;
+            height: 300px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        .game-thumbnail h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        
+        .play-btn {
+            background: #ffa502;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .play-btn:hover {
+            background: #ff7f00;
+        }
+        
+        /* Game Page */
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 20px;
+        }
+        
+        .game-sidebar {
+            background: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .bet-section {
+            margin-bottom: 20px;
+        }
+        
+        .bet-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .bet-btn {
+            width: 100%;
+            padding: 10px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .bet-btn:hover {
+            background: #1e3c72;
+        }
+        
+        .cashout-btn {
+            width: 100%;
+            padding: 10px;
+            background: #2ed573;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .cashout-btn:hover {
+            background: #20bf6b;
+        }
+        
+        .cashout-btn:disabled {
+            background: #ddd;
+            cursor: not-allowed;
+        }
+        
+        .game-display {
+            background: #1e3c72;
+            border-radius: 5px;
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .airplane {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M22 16.21v-1.895L14 8V4a2 2 0 0 0-4 0v4l-8 6.315v1.895l8-2.526V18l-2 2v2l3.5-1 3.5 1v-2l-2-2v-4.316l8 2.526z"/></svg>') no-repeat center center;
+            background-size: contain;
+            transition: bottom 0.1s linear;
+            z-index: 5;
+        }
+        
+        .multiplier-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+            z-index: 5;
+        }
+        
+        .bet-display {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            color: white;
+            font-size: 18px;
+            z-index: 5;
+        }
+        
+        .potential-win {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            color: white;
+            font-size: 18px;
+            z-index: 5;
+        }
+        
+        .game-history {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .history-item {
+            width: 40px;
+            height: 40px;
+            background: #2a5298;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        /* Deposit/Withdraw Pages */
+        .transaction-form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .transaction-form .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .transaction-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .transaction-form input, .transaction-form select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .transaction-form button {
+            width: 100%;
+            padding: 12px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .transaction-form button:hover {
+            background: #1e3c72;
+        }
+        
+        /* History Page */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .history-table th, .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .history-table th {
+            background: #2a5298;
+            color: white;
+        }
+        
+        .history-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .win {
+            color: #2ed573;
+            font-weight: bold;
+        }
+        
+        .loss {
+            color: #ff4757;
+            font-weight: bold;
+        }
+        
+        /* Admin Panel */
+        .admin-panel {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+        }
+        
+        .admin-nav {
+            background: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-nav h3 {
+            margin-bottom: 15px;
+            color: #2a5298;
+        }
+        
+        .admin-nav ul {
+            list-style: none;
+        }
+        
+        .admin-nav li {
+            margin-bottom: 10px;
+        }
+        
+        .admin-nav a {
+            display: block;
+            padding: 10px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        
+        .admin-nav a:hover, .admin-nav a.active {
+            background: #2a5298;
+            color: white;
+        }
+        
+        .admin-content {
+            background: white;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #f9f9f9;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card h3 {
+            color: #2a5298;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card p {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        /* Referral System */
+        .referral-section {
+            background: white;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .referral-link {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        
+        /* Back Button */
+        .back-btn {
+            background: #2a5298;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .back-btn:hover {
+            background: #1e3c72;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2ed573;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard, .game-container, .admin-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Auth Pages -->
+    <div id="auth-container" class="auth-container">
+        <div class="auth-box">
+            <div id="login-form">
+                <h2>Login</h2>
+                <div id="login-error" class="error-message"></div>
+                <form class="auth-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <div class="auth-switch">
+                    Don't have an account? <a href="#" onclick="showRegister()">Register</a>
+                </div>
+            </div>
+            
+            <div id="register-form" style="display: none;">
+                <h2>Register</h2>
+                <div id="register-error" class="error-message"></div>
+                <form class="auth-form" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirm Password</label>
+                        <input type="password" id="register-confirm-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="referral-code">Referral Code (Optional)</label>
+                        <input type="text" id="referral-code">
+                    </div>
+                    <button type="submit">Register</button>
+                </form>
+                <div class="auth-switch">
+                    Already have an account? <a href="#" onclick="showLogin()">Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Container -->
+    <div id="main-container" class="container" style="display: none;">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">Aviator Game</div>
+            <div class="user-info">
+                <div class="balance">Balance: <span id="user-balance">0</span> TK</div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Back Button -->
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        
+        <!-- Dashboard -->
+        <div id="dashboard-page" class="dashboard">
+            <div class="sidebar">
+                <ul class="sidebar-menu">
+                    <li><a href="#" class="active" onclick="showPage('dashboard')">Dashboard</a></li>
+                    <li><a href="#" onclick="showPage('game')">Play Game</a></li>
+                    <li><a href="#" onclick="showPage('deposit')">Deposit</a></li>
+                    <li><a href="#" onclick="showPage('withdraw')">Withdraw</a></li>
+                    <li><a href="#" onclick="showPage('history')">History</a></li>
+                    <li><a href="#" onclick="showPage('referral')">Referral</a></li>
+                    <li id="admin-link" style="display: none;"><a href="#" onclick="showPage('admin')">Admin Panel</a></li>
+                </ul>
+            </div>
+            
+            <div class="main-content">
+                <div class="game-thumbnail">
+                    <h2>Aviator Game</h2>
+                    <p>Test your luck and win big!</p>
+                    <button class="play-btn" onclick="showPage('game')">Play Now</button>
+                </div>
+                
+                <div>
+                    <h3>Recent Wins</h3>
+                    <div class="game-history" id="recent-wins">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Page -->
+        <div id="game-page" class="game-container" style="display: none;">
+            <div class="game-sidebar">
+                <div class="bet-section">
+                    <h3>Bet 1</h3>
+                    <input type="number" id="bet-amount-1" class="bet-input" placeholder="Amount (2-50000)" min="2" max="50000">
+                    <button class="bet-btn" onclick="placeBet(1)">Place Bet</button>
+                </div>
+                
+                <div class="bet-section">
+                    <h3>Bet 2</h3>
+                    <input type="number" id="bet-amount-2" class="bet-input" placeholder="Amount (2-50000)" min="2" max="50000">
+                    <button class="bet-btn" onclick="placeBet(2)">Place Bet</button>
+                </div>
+                
+                <div class="cashout-section">
+                    <button id="cashout-btn" class="cashout-btn" disabled onclick="cashOut()">Cash Out (1.00X)</button>
+                </div>
+                
+                <div class="game-stats">
+                    <h3>Current Multiplier: <span id="current-multiplier">1.00X</span></h3>
+                    <h3>Potential Win: <span id="potential-win">0</span> TK</h3>
+                </div>
+                
+                <div class="game-history">
+                    <h3>Recent Games</h3>
+                    <div id="game-history-list">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-display">
+                <div class="multiplier-display">Multiplier: <span id="multiplier-display">1.00X</span></div>
+                <div class="bet-display">Bet: <span id="bet-display">0</span> TK</div>
+                <div class="potential-win">Potential Win: <span id="game-potential-win">0</span> TK</div>
+                <div id="countdown" class="countdown" style="display: none;">15</div>
+                <div id="airplane" class="airplane"></div>
+            </div>
+        </div>
+        
+        <!-- Deposit Page -->
+        <div id="deposit-page" style="display: none;">
+            <h2>Deposit Funds</h2>
+            <form class="transaction-form" onsubmit="handleDeposit(event)">
+                <div class="form-group">
+                    <label for="deposit-amount">Amount (TK)</label>
+                    <input type="number" id="deposit-amount" min="10" required>
+                </div>
+                <div class="form-group">
+                    <label for="deposit-method">Payment Method</label>
+                    <select id="deposit-method" required>
+                        <option value="bkash">Bkash</option>
+                        <option value="nagad">Nagad</option>
+                        <option value="rocket">Rocket</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="deposit-number">Sender Number</label>
+                    <input type="text" id="deposit-number" required>
+                </div>
+                <div class="form-group">
+                    <label for="deposit-trx">Transaction ID</label>
+                    <input type="text" id="deposit-trx" required>
+                </div>
+                <button type="submit">Submit Deposit Request</button>
+            </form>
+        </div>
+        
+        <!-- Withdraw Page -->
+        <div id="withdraw-page" style="display: none;">
+            <h2>Withdraw Funds</h2>
+            <form class="transaction-form" onsubmit="handleWithdraw(event)">
+                <div class="form-group">
+                    <label for="withdraw-amount">Amount (TK)</label>
+                    <input type="number" id="withdraw-amount" min="100" required>
+                </div>
+                <div class="form-group">
+                    <label for="withdraw-method">Payment Method</label>
+                    <select id="withdraw-method" required>
+                        <option value="bkash">Bkash</option>
+                        <option value="nagad">Nagad</option>
+                        <option value="rocket">Rocket</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="withdraw-number">Receiver Number</label>
+                    <input type="text" id="withdraw-number" required>
+                </div>
+                <button type="submit">Submit Withdraw Request</button>
+            </form>
+        </div>
+        
+        <!-- History Page -->
+        <div id="history-page" style="display: none;">
+            <h2>Game History</h2>
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Bet Amount</th>
+                        <th>Multiplier</th>
+                        <th>Win Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="history-table-body">
+                    <!-- Filled by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Referral Page -->
+        <div id="referral-page" style="display: none;">
+            <h2>Referral Program</h2>
+            <div class="referral-section">
+                <h3>Your Referral Link</h3>
+                <div class="referral-link" id="referral-link">
+                    <!-- Filled by JavaScript -->
+                </div>
+                <p>Earn 30 TK for each friend who signs up using your link and makes a deposit!</p>
+            </div>
+            
+            <div class="referral-section">
+                <h3>Your Referrals</h3>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Bonus</th>
+                        </tr>
+                    </thead>
+                    <tbody id="referrals-table-body">
+                        <!-- Filled by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Admin Panel -->
+        <div id="admin-page" class="admin-panel" style="display: none;">
+            <div class="admin-nav">
+                <h3>Admin Panel</h3>
+                <ul>
+                    <li><a href="#" class="active" onclick="showAdminSection('dashboard')">Dashboard</a></li>
+                    <li><a href="#" onclick="showAdminSection('users')">Users</a></li>
+                    <li><a href="#" onclick="showAdminSection('deposits')">Deposits</a></li>
+                    <li><a href="#" onclick="showAdminSection('withdrawals')">Withdrawals</a></li>
+                    <li><a href="#" onclick="showAdminSection('referrals')">Referrals</a></li>
+                    <li><a href="#" onclick="showAdminSection('games')">Games</a></li>
+                    <li><a href="#" onclick="showAdminSection('settings')">Settings</a></li>
+                </ul>
+            </div>
+            
+            <div class="admin-content">
+                <div id="admin-dashboard">
+                    <h2>Admin Dashboard</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Users</h3>
+                            <p id="total-users">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Deposits</h3>
+                            <p id="total-deposits">0 TK</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Withdrawals</h3>
+                            <p id="total-withdrawals">0 TK</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Bets</h3>
+                            <p id="total-bets">0 TK</p>
+                        </div>
+                    </div>
+                    
+                    <h3>Game Controls</h3>
+                    <button onclick="startNewGameRound()">Start New Game Round</button>
+                    <div id="game-status">Current status: Waiting for next round</div>
+                </div>
+                
+                <div id="admin-users" style="display: none;">
+                    <h2>User Management</h2>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Balance</th>
+                                <th>Total Bets</th>
+                                <th>Total Wins</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="admin-deposits" style="display: none;">
+                    <h2>Deposit Requests</h2>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deposits-table-body">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="admin-withdrawals" style="display: none;">
+                    <h2>Withdrawal Requests</h2>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawals-table-body">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="admin-referrals" style="display: none;">
+                    <h2>Referral Approvals</h2>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Referrer</th>
+                                <th>New User</th>
+                                <th>Deposit Amount</th>
+                                <th>Bonus</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="referrals-admin-table-body">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="admin-games" style="display: none;">
+                    <h2>Game Management</h2>
+                    <button onclick="generateNextGames()">Generate Next 10 Games</button>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Game ID</th>
+                                <th>Multiplier</th>
+                                <th>Status</th>
+                                <th>Players</th>
+                                <th>Total Bets</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="games-table-body">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="admin-settings" style="display: none;">
+                    <h2>System Settings</h2>
+                    <form id="settings-form">
+                        <div class="form-group">
+                            <label for="min-bet">Minimum Bet (TK)</label>
+                            <input type="number" id="min-bet" value="2" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="max-bet">Maximum Bet (TK)</label>
+                            <input type="number" id="max-bet" value="50000" min="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="min-withdraw">Minimum Withdrawal (TK)</label>
+                            <input type="number" id="min-withdraw" value="100" min="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="referral-bonus">Referral Bonus (TK)</label>
+                            <input type="number" id="referral-bonus" value="30" min="0">
+                        </div>
+                        <button type="button" onclick="saveSettings()">Save Settings</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+    
+    <script>
+        // Firebase configuration - REPLACE WITH YOUR CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyCxTZfdSIQKoQWP-UPQj6L7ZObATsL7314",
+            authDomain: "aviator-crash-dbf1b.firebaseapp.com",
+            databaseURL: "https://aviator-crash-dbf1b-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "aviator-crash-dbf1b",
+            storageBucket: "aviator-crash-dbf1b.appspot.com",
+            messagingSenderId: "1016424043766",
+            appId: "1:1016424043766:web:2e90bfaacbd515a44208d7",
+            measurementId: "G-STQL077SEL"
+        };
 
-<canvas id="visual"></canvas>
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const rdb = firebase.database();
+        
+        // Initialize Firestore with timestamps
+        db.settings({ timestampsInSnapshots: true });
 
-<div class="container">
-  <h1>Make By Mr. Abuhurira</h1>
+        // Global variables
+        let currentUser = null;
+        let userData = null;
+        let activeBets = [];
+        let currentGame = null;
+        let gameInterval = null;
+        let cashoutMultiplier = 1.00;
+        let upcomingGames = [];
+        let pageHistory = [];
 
-  <textarea id="textInput" placeholder="এখানে আপনার লেখাটি লিখুন..."></textarea><br>
+        // Auth functions
+        function showLogin() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-error').textContent = '';
+        }
 
-  <select id="languageSelect">
-    <option value="Bangla">Bangla</option>
-    <option value="English">English</option>
-  </select>
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+            document.getElementById('register-error').textContent = '';
+        }
 
-  <select id="voiceSelect">
-    <option value="female">Female</option>
-    <option value="male">Male</option>
-  </select><br>
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    currentUser = userCredential.user;
+                    checkAdminStatus();
+                    loadUserData();
+                    showNotification('Login successful!');
+                    // Store login state in localStorage
+                    localStorage.setItem('aviator_user', JSON.stringify({
+                        email: email,
+                        lastLogin: Date.now()
+                    }));
+                })
+                .catch((error) => {
+                    document.getElementById('login-error').textContent = error.message;
+                });
+        }
 
-  <button onclick="speakText()">Tap To 🔊 Speak</button>
+        function handleRegister(e) {
+            e.preventDefault();
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const referralCode = document.getElementById('referral-code').value;
+            
+            if (password !== confirmPassword) {
+                document.getElementById('register-error').textContent = 'Passwords do not match';
+                return;
+            }
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    currentUser = userCredential.user;
+                    // Generate referral code (first 6 chars of UID + first 4 of email)
+                    const referralCode = userCredential.user.uid.substring(0, 6) + 
+                                        email.substring(0, 4).replace(/[@.]/g, '');
+                    
+                    // Create user document
+                    return db.collection('users').doc(userCredential.user.uid).set({
+                        email: email,
+                        balance: 0,
+                        totalBets: 0,
+                        totalWins: 0,
+                        totalDeposits: 0,
+                        totalWithdrawals: 0,
+                        referralCode: referralCode,
+                        referredBy: referralCode || null,
+                        isAdmin: email === "admin2.0@gmail.com",
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(() => {
+                    // If referred by someone, create referral record
+                    const referralCode = document.getElementById('referral-code').value;
+                    if (referralCode) {
+                        return db.collection('referrals').add({
+                            referrerCode: referralCode,
+                            newUserEmail: email,
+                            status: 'pending',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                })
+                .then(() => {
+                    checkAdminStatus();
+                    loadUserData();
+                    showNotification('Registration successful!');
+                })
+                .catch((error) => {
+                    document.getElementById('register-error').textContent = error.message;
+                });
+        }
 
-  <div class="processing" id="statusText"></div>
-</div>
+        function logout() {
+            auth.signOut().then(() => {
+                currentUser = null;
+                userData = null;
+                document.getElementById('auth-container').style.display = 'flex';
+                document.getElementById('main-container').style.display = 'none';
+                showLogin();
+                // Clear local storage
+                localStorage.removeItem('aviator_user');
+            });
+        }
 
-<script>
-  function speakText() {
-    const text = document.getElementById("textInput").value.trim();
-    const voice = document.getElementById("voiceSelect").value;
-    const language = document.getElementById("languageSelect").value;
-    const status = document.getElementById("statusText");
+        function checkAdminStatus() {
+            if (!currentUser) return;
+            
+            db.collection('users').doc(currentUser.uid).get()
+                .then((doc) => {
+                    if (doc.exists && doc.data().isAdmin) {
+                        document.getElementById('admin-link').style.display = 'block';
+                        initAdminPanel();
+                    } else {
+                        document.getElementById('admin-link').style.display = 'none';
+                    }
+                });
+        }
 
-    if (text === "") {
-      status.innerText = "⚠️ Text likhun!";
-      return;
-    }
+        function loadUserData() {
+            if (!currentUser) return;
+            
+            db.collection('users').doc(currentUser.uid).onSnapshot((doc) => {
+                if (doc.exists) {
+                    userData = doc.data();
+                    document.getElementById('user-balance').textContent = userData.balance.toFixed(2);
+                    document.getElementById('auth-container').style.display = 'none';
+                    document.getElementById('main-container').style.display = 'block';
+                    
+                    // Generate referral link
+                    if (userData.referralCode) {
+                        const referralLink = `${window.location.origin}${window.location.pathname}?ref=${userData.referralCode}`;
+                        document.getElementById('referral-link').textContent = referralLink;
+                    }
+                    
+                    showPage('dashboard');
+                    loadGameHistory();
+                    loadRecentWins();
+                    loadReferrals();
+                }
+            });
+        }
 
-    status.innerText = "⏳ Processing...";
+        // Page navigation
+        function showPage(page) {
+            // Add current page to history
+            if (pageHistory[pageHistory.length - 1] !== page) {
+                pageHistory.push(page);
+            }
+            
+            // Hide all pages
+            document.getElementById('dashboard-page').style.display = 'none';
+            document.getElementById('game-page').style.display = 'none';
+            document.getElementById('deposit-page').style.display = 'none';
+            document.getElementById('withdraw-page').style.display = 'none';
+            document.getElementById('history-page').style.display = 'none';
+            document.getElementById('referral-page').style.display = 'none';
+            document.getElementById('admin-page').style.display = 'none';
+            
+            // Show selected page
+            switch(page) {
+                case 'dashboard':
+                    document.getElementById('dashboard-page').style.display = 'grid';
+                    break;
+                case 'game':
+                    document.getElementById('game-page').style.display = 'grid';
+                    loadCurrentGame();
+                    break;
+                case 'deposit':
+                    document.getElementById('deposit-page').style.display = 'block';
+                    break;
+                case 'withdraw':
+                    document.getElementById('withdraw-page').style.display = 'block';
+                    break;
+                case 'history':
+                    document.getElementById('history-page').style.display = 'block';
+                    break;
+                case 'referral':
+                    document.getElementById('referral-page').style.display = 'block';
+                    break;
+                case 'admin':
+                    document.getElementById('admin-page').style.display = 'grid';
+                    showAdminSection('dashboard');
+                    break;
+            }
+            
+            // Update active menu item
+            const menuItems = document.querySelectorAll('.sidebar-menu a');
+            menuItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.textContent.toLowerCase().includes(page)) {
+                    item.classList.add('active');
+                }
+            });
+        }
 
-    let voiceName = "";
+        function goBack() {
+            if (pageHistory.length > 1) {
+                pageHistory.pop(); // Remove current page
+                const prevPage = pageHistory.pop();
+                showPage(prevPage || 'dashboard');
+            } else {
+                showPage('dashboard');
+            }
+        }
 
-    if (language === "Bangla") {
-      voiceName = voice === "female" ? "Bangla India Female" : "Bangla India Male";
-    } else if (language === "English") {
-      voiceName = voice === "female" ? "UK English Female" : "UK English Male";
-    }
+        // Game functions
+        function loadCurrentGame() {
+            rdb.ref('games/current').once('value').then((snapshot) => {
+                currentGame = snapshot.val();
+                
+                if (currentGame && currentGame.status === 'waiting') {
+                    startCountdown();
+                } else if (currentGame && currentGame.status === 'playing') {
+                    joinGameInProgress();
+                } else {
+                    document.getElementById('countdown').style.display = 'none';
+                }
+            });
+        }
 
-    setTimeout(() => {
-      responsiveVoice.speak(text, voiceName);
-      status.innerText = "✅ Done! Play Started...";
-    }, 1500);
-  }
+        function startCountdown() {
+            const countdownElement = document.getElementById('countdown');
+            countdownElement.style.display = 'flex';
+            
+            let seconds = 15;
+            countdownElement.textContent = seconds;
+            
+            const countdownInterval = setInterval(() => {
+                seconds--;
+                countdownElement.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    clearInterval(countdownInterval);
+                    countdownElement.style.display = 'none';
+                    startGame();
+                }
+            }, 1000);
+        }
 
-  // Neon Live Sound Background (Canvas Animation)
-  const canvas = document.getElementById("visual");
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+        function startGame() {
+            // Update game status to playing
+            rdb.ref('games/current').update({
+                status: 'playing',
+                startTime: Date.now()
+            });
+            
+            // Start game animation
+            const airplane = document.getElementById('airplane');
+            airplane.style.bottom = '0%';
+            
+            let multiplier = 1.00;
+            let crashed = false;
+            
+            gameInterval = setInterval(() => {
+                // Random chance to crash increases with multiplier
+                const crashChance = Math.min(0.1 + (multiplier * 0.005), 0.95);
+                
+                if (Math.random() < crashChance && !crashed) {
+                    crashed = true;
+                    clearInterval(gameInterval);
+                    endGame(multiplier);
+                    return;
+                }
+                
+                // Increase multiplier
+                multiplier += 0.01;
+                cashoutMultiplier = multiplier;
+                
+                // Update display
+                document.getElementById('multiplier-display').textContent = multiplier.toFixed(2) + 'X';
+                document.getElementById('current-multiplier').textContent = multiplier.toFixed(2) + 'X';
+                document.getElementById('cashout-btn').textContent = 'Cash Out (' + multiplier.toFixed(2) + 'X)';
+                
+                // Update airplane position
+                const bottomPos = Math.min(multiplier * 5, 95);
+                airplane.style.bottom = bottomPos + '%';
+                
+                // Update potential wins
+                updatePotentialWins(multiplier);
+            }, 100);
+        }
 
-  let waveOffset = 0;
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath();
-    ctx.strokeStyle = '#0ff';
-    ctx.lineWidth = 2;
+        function joinGameInProgress() {
+            const gameTime = Date.now() - currentGame.startTime;
+            const multiplier = 1.00 + (gameTime / 1000);
+            
+            // Start game animation from current multiplier
+            const airplane = document.getElementById('airplane');
+            const bottomPos = Math.min(multiplier * 5, 95);
+            airplane.style.bottom = bottomPos + '%';
+            
+            document.getElementById('multiplier-display').textContent = multiplier.toFixed(2) + 'X';
+            document.getElementById('current-multiplier').textContent = multiplier.toFixed(2) + 'X';
+            document.getElementById('cashout-btn').textContent = 'Cash Out (' + multiplier.toFixed(2) + 'X)';
+            
+            cashoutMultiplier = multiplier;
+            updatePotentialWins(multiplier);
+            
+            gameInterval = setInterval(() => {
+                // Random chance to crash increases with multiplier
+                const crashChance = Math.min(0.1 + (multiplier * 0.005), 0.95);
+                
+                if (Math.random() < crashChance) {
+                    clearInterval(gameInterval);
+                    endGame(multiplier);
+                    return;
+                }
+                
+                // Increase multiplier
+                multiplier += 0.01;
+                cashoutMultiplier = multiplier;
+                
+                // Update display
+                document.getElementById('multiplier-display').textContent = multiplier.toFixed(2) + 'X';
+                document.getElementById('current-multiplier').textContent = multiplier.toFixed(2) + 'X';
+                document.getElementById('cashout-btn').textContent = 'Cash Out (' + multiplier.toFixed(2) + 'X)';
+                
+                // Update airplane position
+                const bottomPos = Math.min(multiplier * 5, 95);
+                airplane.style.bottom = bottomPos + '%';
+                
+                // Update potential wins
+                updatePotentialWins(multiplier);
+            }, 100);
+        }
 
-    for (let i = 0; i < canvas.width; i++) {
-      const y = canvas.height / 2 + Math.sin(i * 0.01 + waveOffset) * 100;
-      if (i === 0) ctx.moveTo(i, y);
-      else ctx.lineTo(i, y);
-    }
+        function endGame(finalMultiplier) {
+            // Update game status
+            rdb.ref('games/current').update({
+                status: 'ended',
+                endTime: Date.now(),
+                finalMultiplier: finalMultiplier
+            });
+            
+            // Process bets
+            processBets(finalMultiplier);
+            
+            // Reset game display
+            setTimeout(() => {
+                document.getElementById('airplane').style.bottom = '0%';
+                document.getElementById('multiplier-display').textContent = '1.00X';
+                document.getElementById('current-multiplier').textContent = '1.00X';
+                document.getElementById('cashout-btn').textContent = 'Cash Out (1.00X)';
+                document.getElementById('cashout-btn').disabled = true;
+                
+                // Start new game after delay
+                setTimeout(() => {
+                    rdb.ref('games/current').set({
+                        status: 'waiting',
+                        startTime: Date.now() + 15000 // Start in 15 seconds
+                    });
+                    
+                    startCountdown();
+                }, 5000);
+            }, 2000);
+        }
 
-    ctx.stroke();
-    waveOffset += 0.05;
-    requestAnimationFrame(draw);
-  }
+        function placeBet(betNumber) {
+            const betAmount = parseFloat(document.getElementById('bet-amount-' + betNumber).value);
+            
+            if (isNaN(betAmount)) {
+                showNotification('Please enter a valid bet amount');
+                return;
+            }
+            
+            if (betAmount < 2 || betAmount > 50000) {
+                showNotification('Bet amount must be between 2 and 50,000 TK');
+                return;
+            }
+            
+            if (betAmount > userData.balance) {
+                showNotification('Insufficient balance');
+                return;
+            }
+            
+            // Add bet to active bets
+            activeBets.push({
+                amount: betAmount,
+                betNumber: betNumber,
+                cashedOut: false
+            });
+            
+            // Update UI
+            document.getElementById('bet-amount-' + betNumber).value = '';
+            document.getElementById('bet-display').textContent = activeBets.reduce((sum, bet) => sum + bet.amount, 0);
+            document.getElementById('cashout-btn').disabled = false;
+            
+            // Deduct from balance
+            const newBalance = userData.balance - betAmount;
+            db.collection('users').doc(currentUser.uid).update({
+                balance: newBalance,
+                totalBets: userData.totalBets + betAmount
+            });
+            
+            showNotification('Bet placed: ' + betAmount + ' TK');
+        }
 
-  draw();
-</script>
+        function cashOut() {
+            // Mark bets as cashed out
+            activeBets.forEach(bet => {
+                if (!bet.cashedOut) {
+                    bet.cashedOut = true;
+                    const winAmount = bet.amount * cashoutMultiplier;
+                    
+                    // Add to balance
+                    const newBalance = userData.balance + winAmount;
+                    db.collection('users').doc(currentUser.uid).update({
+                        balance: newBalance,
+                        totalWins: userData.totalWins + winAmount
+                    });
+                    
+                    // Record game history
+                    db.collection('userHistory').add({
+                        userId: currentUser.uid,
+                        email: currentUser.email,
+                        date: new Date(),
+                        betAmount: bet.amount,
+                        multiplier: cashoutMultiplier,
+                        winAmount: winAmount,
+                        status: 'win'
+                    });
+                    
+                    showNotification('Cashed out at ' + cashoutMultiplier.toFixed(2) + 'X! Won: ' + winAmount.toFixed(2) + ' TK');
+                }
+            });
+            
+            // Update UI
+            document.getElementById('cashout-btn').disabled = true;
+            activeBets = activeBets.filter(bet => !bet.cashedOut);
+        }
 
+        function processBets(finalMultiplier) {
+            activeBets.forEach(bet => {
+                if (!bet.cashedOut) {
+                    if (finalMultiplier >= 1.5) {
+                        // Player wins
+                        const winAmount = bet.amount * finalMultiplier;
+                        
+                        // Add to balance
+                        const newBalance = userData.balance + winAmount;
+                        db.collection('users').doc(currentUser.uid).update({
+                            balance: newBalance,
+                            totalWins: userData.totalWins + winAmount
+                        });
+                        
+                        // Record game history
+                        db.collection('userHistory').add({
+                            userId: currentUser.uid,
+                            email: currentUser.email,
+                            date: new Date(),
+                            betAmount: bet.amount,
+                            multiplier: finalMultiplier,
+                            winAmount: winAmount,
+                            status: 'win'
+                        });
+                        
+                        showNotification('Game ended at ' + finalMultiplier.toFixed(2) + 'X! Won: ' + winAmount.toFixed(2) + ' TK');
+                    } else {
+                        // Player loses
+                        db.collection('userHistory').add({
+                            userId: currentUser.uid,
+                            email: currentUser.email,
+                            date: new Date(),
+                            betAmount: bet.amount,
+                            multiplier: finalMultiplier,
+                            winAmount: 0,
+                            status: 'loss'
+                        });
+                        
+                        showNotification('Game crashed at ' + finalMultiplier.toFixed(2) + 'X. Lost: ' + bet.amount + ' TK');
+                    }
+                }
+            });
+            
+            // Reset active bets
+            activeBets = [];
+            document.getElementById('bet-display').textContent = '0';
+        }
+
+        function updatePotentialWins(multiplier) {
+            const totalPotentialWin = activeBets.reduce((sum, bet) => {
+                return sum + (bet.cashedOut ? 0 : bet.amount * multiplier);
+            }, 0);
+            
+            document.getElementById('potential-win').textContent = totalPotentialWin.toFixed(2);
+            document.getElementById('game-potential-win').textContent = totalPotentialWin.toFixed(2);
+        }
+
+        // Transaction functions
+        function handleDeposit(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('deposit-amount').value);
+            const method = document.getElementById('deposit-method').value;
+            const number = document.getElementById('deposit-number').value;
+            const trx = document.getElementById('deposit-trx').value;
+            
+            if (isNaN(amount)) {
+                showNotification('Please enter a valid amount');
+                return;
+            }
+            
+            if (amount < 10) {
+                showNotification('Minimum deposit is 10 TK');
+                return;
+            }
+            
+            // Create deposit request
+            db.collection('deposits').add({
+                userId: currentUser.uid,
+                email: currentUser.email,
+                amount: amount,
+                method: method,
+                number: number,
+                trxId: trx,
+                status: 'pending',
+                date: new Date()
+            });
+            
+            // Reset form
+            document.getElementById('deposit-amount').value = '';
+            document.getElementById('deposit-number').value = '';
+            document.getElementById('deposit-trx').value = '';
+            
+            showNotification('Deposit request submitted. Please wait for admin approval.');
+        }
+
+        function handleWithdraw(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            const method = document.getElementById('withdraw-method').value;
+            const number = document.getElementById('withdraw-number').value;
+            
+            if (isNaN(amount)) {
+                showNotification('Please enter a valid amount');
+                return;
+            }
+            
+            if (amount < 100) {
+                showNotification('Minimum withdrawal is 100 TK');
+                return;
+            }
+            
+            if (amount > userData.balance) {
+                showNotification('Insufficient balance');
+                return;
+            }
+            
+            // Create withdrawal request
+            db.collection('withdrawals').add({
+                userId: currentUser.uid,
+                email: currentUser.email,
+                amount: amount,
+                method: method,
+                number: number,
+                status: 'pending',
+                date: new Date()
+            });
+            
+            // Deduct from balance
+            const newBalance = userData.balance - amount;
+            db.collection('users').doc(currentUser.uid).update({
+                balance: newBalance
+            });
+            
+            // Reset form
+            document.getElementById('withdraw-amount').value = '';
+            document.getElementById('withdraw-number').value = '';
+            
+            showNotification('Withdrawal request submitted. Please wait for admin processing.');
+        }
+
+        // History functions
+        function loadGameHistory() {
+            db.collection('userHistory')
+                .where('userId', '==', currentUser.uid)
+                .orderBy('date', 'desc')
+                .limit(20)
+                .get()
+                .then((querySnapshot) => {
+                    const tbody = document.getElementById('history-table-body');
+                    tbody.innerHTML = '';
+                    
+                    querySnapshot.forEach((doc) => {
+                        const game = doc.data();
+                        const row = document.createElement('tr');
+                        
+                        const dateCell = document.createElement('td');
+                        dateCell.textContent = game.date.toDate().toLocaleString();
+                        
+                        const betCell = document.createElement('td');
+                        betCell.textContent = game.betAmount.toFixed(2);
+                        
+                        const multiplierCell = document.createElement('td');
+                        multiplierCell.textContent = game.multiplier.toFixed(2) + 'X';
+                        
+                        const winCell = document.createElement('td');
+                        winCell.textContent = game.winAmount ? game.winAmount.toFixed(2) : '0.00';
+                        
+                        const statusCell = document.createElement('td');
+                        statusCell.textContent = game.status;
+                        statusCell.className = game.status;
+                        
+                        row.appendChild(dateCell);
+                        row.appendChild(betCell);
+                        row.appendChild(multiplierCell);
+                        row.appendChild(winCell);
+                        row.appendChild(statusCell);
+                        
+                        tbody.appendChild(row);
+                    });
+                });
+        }
+
+        function loadRecentWins() {
+            db.collection('userHistory')
+                .where('userId', '==', currentUser.uid)
+                .where('status', '==', 'win')
+                .orderBy('date', 'desc')
+                .limit(5)
+                .get()
+                .then((querySnapshot) => {
+                    const container = document.getElementById('recent-wins');
+                    container.innerHTML = '';
+                    
+                    querySnapshot.forEach((doc) => {
+                        const game = doc.data();
+                        const item = document.createElement('div');
+                        item.className = 'history-item';
+                        item.textContent = game.multiplier.toFixed(1) + 'X';
+                        container.appendChild(item);
+                    });
+                });
+        }
+
+        // Referral functions
+        function loadReferrals() {
+            // Load referrals where current user is referrer
+            db.collection('referrals')
+                .where('referrerCode', '==', userData.referralCode)
+                .orderBy('createdAt', 'desc')
+                .get()
+                .then((querySnapshot) => {
+                    const tbody = document.getElementById('referrals-table-body');
+                    tbody.innerHTML = '';
+                    
+                    querySnapshot.forEach((doc) => {
+                        const referral = doc.data();
+                        const row = document.createElement('tr');
+                        
+                        const emailCell = document.createElement('td');
+                        emailCell.textContent = referral.newUserEmail;
+                        
+                        const statusCell = document.createElement('td');
+                        statusCell.textContent = referral.status;
+                        
+                        const bonusCell = document.createElement('td');
+                        bonusCell.textContent = referral.status === 'approved' ? '30 TK' : 'Pending';
+                        
+                        row.appendChild(emailCell);
+                        row.appendChild(statusCell);
+                        row.appendChild(bonusCell);
+                        
+                        tbody.appendChild(row);
+                    });
+                });
+        }
+
+        // Admin functions
+        function showAdminSection(section) {
+            // Hide all sections
+            document.getElementById('admin-dashboard').style.display = 'none';
+            document.getElementById('admin-users').style.display = 'none';
+            document.getElementById('admin-deposits').style.display = 'none';
+            document.getElementById('admin-withdrawals').style.display = 'none';
+            document.getElementById('admin-referrals').style.display = 'none';
+            document.getElementById('admin-games').style.display = 'none';
+            document.getElementById('admin-settings').style.display = 'none';
+            
+            // Show selected section
+            document.getElementById('admin-' + section).style.display = 'block';
+            
+            // Update active menu item
+            const menuItems = document.querySelectorAll('.admin-nav a');
+            menuItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.textContent.toLowerCase().includes(section)) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Load section data if needed
+            switch(section) {
+                case 'users':
+                    loadAdminUsers();
+                    break;
+                case 'deposits':
+                    loadAdminDeposits();
+                    break;
+                case 'withdrawals':
+                    loadAdminWithdrawals();
+                    break;
+                case 'referrals':
+                    loadAdminReferrals();
+                    break;
+                case 'games':
+                    loadAdminGames();
+                    break;
+                case 'settings':
+                    loadAdminSettings();
+                    break;
+            }
+        }
+
+        function initAdminPanel() {
+            if (!userData.isAdmin) return;
+            
+            loadAdminStats();
+            showAdminSection('dashboard');
+        }
+
+        function loadAdminStats() {
+            // Total users
+            db.collection('users').get().then((querySnapshot) => {
+                document.getElementById('total-users').textContent = querySnapshot.size;
+            });
+            
+            // Total deposits
+            db.collection('deposits')
+                .where('status', '==', 'approved')
+                .get()
+                .then((querySnapshot) => {
+                    let total = 0;
+                    querySnapshot.forEach((doc) => {
+                        total += doc.data().amount;
+                    });
+                    document.getElementById('total-deposits').textContent = total.toFixed(2) + ' TK';
+                });
+            
+            // Total withdrawals
+            db.collection('withdrawals')
+                .where('status', '==', 'completed')
+                .get()
+                .then((querySnapshot) => {
+                    let total = 0;
+                    querySnapshot.forEach((doc) => {
+                        total += doc.data().amount;
+                    });
+                    document.getElementById('total-withdrawals').textContent = total.toFixed(2) + ' TK';
+                });
+            
+            // Total bets
+            db.collection('userHistory').get().then((querySnapshot) => {
+                let total = 0;
+                querySnapshot.forEach((doc) => {
+                    total += doc.data().betAmount;
+                });
+                document.getElementById('total-bets').textContent = total.toFixed(2) + ' TK';
+            });
+        }
+
+        function loadAdminUsers() {
+            db.collection('users').get().then((querySnapshot) => {
+                const tbody = document.getElementById('users-table-body');
+                tbody.innerHTML = '';
+                
+                querySnapshot.forEach((doc) => {
+                    const user = doc.data();
+                    const row = document.createElement('tr');
+                    
+                    const emailCell = document.createElement('td');
+                    emailCell.textContent = user.email;
+                    
+                    const balanceCell = document.createElement('td');
+                    balanceCell.textContent = user.balance.toFixed(2);
+                    
+                    const betsCell = document.createElement('td');
+                    betsCell.textContent = user.totalBets.toFixed(2);
+                    
+                    const winsCell = document.createElement('td');
+                    winsCell.textContent = user.totalWins.toFixed(2);
+                    
+                    const actionsCell = document.createElement('td');
+                    const addBalanceInput = document.createElement('input');
+                    addBalanceInput.type = 'number';
+                    addBalanceInput.placeholder = 'Amount';
+                    addBalanceInput.style.width = '80px';
+                    addBalanceInput.style.marginRight = '5px';
+                    
+                    const addBalanceBtn = document.createElement('button');
+                    addBalanceBtn.textContent = 'Add';
+                    addBalanceBtn.onclick = () => {
+                        const amount = parseFloat(addBalanceInput.value);
+                        if (!isNaN(amount)) {
+                            db.collection('users').doc(doc.id).update({
+                                balance: user.balance + amount
+                            });
+                            addBalanceInput.value = '';
+                            showNotification('Balance added to ' + user.email);
+                        }
+                    };
+                    
+                    actionsCell.appendChild(addBalanceInput);
+                    actionsCell.appendChild(addBalanceBtn);
+                    
+                    row.appendChild(emailCell);
+                    row.appendChild(balanceCell);
+                    row.appendChild(betsCell);
+                    row.appendChild(winsCell);
+                    row.appendChild(actionsCell);
+                    
+                    tbody.appendChild(row);
+                });
+            });
+        }
+
+        function loadAdminDeposits() {
+            db.collection('deposits')
+                .orderBy('date', 'desc')
+                .get()
+                .then((querySnapshot) => {
+                    const tbody = document.getElementById('deposits-table-body');
+                    tbody.innerHTML = '';
+                    
+                    querySnapshot.forEach((doc) => {
+                        const deposit = doc.data();
+                        const row = document.createElement('tr');
+                        
+                        const userCell = document.createElement('td');
+                        userCell.textContent = deposit.email;
+                        
+                        const amountCell = document.createElement('td');
+                        amountCell.textContent = deposit.amount.toFixed(2);
+                        
+                        const methodCell = document.createElement('td');
+                        methodCell.textContent = deposit.method;
+                        
+                        const statusCell = document.createElement('td');
+                        statusCell.textContent = deposit.status;
+                        
+                        const dateCell = document.createElement('td');
+                        dateCell.textContent = deposit.date.toDate().toLocaleString();
+                        
+                        const actionsCell = document.createElement('td');
+                        
+                        if (deposit.status === 'pending') {
+                            const approveBtn = document.createElement('button');
+                            approveBtn.textContent = 'Approve';
+                            approveBtn.onclick = () => {
+                                // Update deposit status
+                                db.collection('deposits').doc(doc.id).update({
+                                    status: 'approved'
+                                });
+                                
+                                // Add to user balance
+                                db.collection('users').doc(deposit.userId).get().then((userDoc) => {
+                                    const user = userDoc.data();
+                                    db.collection('users').doc(deposit.userId).update({
+                                        balance: user.balance + deposit.amount,
+                                        totalDeposits: user.totalDeposits + deposit.amount
+                                    });
+                                });
+                                
+                                showNotification('Deposit approved for ' + deposit.email);
+                            };
+                            
+                            const rejectBtn = document.createElement('button');
+                            rejectBtn.textContent = 'Reject';
+                            rejectBtn.style.marginLeft = '5px';
+                            rejectBtn.onclick = () => {
+                                db.collection('deposits').doc(doc.id).update({
+                                    status: 'rejected'
+                                });
+                                showNotification('Deposit rejected for ' + deposit.email);
+                            };
+                            
+                            actionsCell.appendChild(approveBtn);
+                            actionsCell.appendChild(rejectBtn);
+                        } else {
+                            actionsCell.textContent = 'Completed';
+                        }
+                        
+                        row.appendChild(userCell);
+                        row.appendChild(amountCell);
+                        row.appendChild(methodCell);
+                        row.appendChild(statusCell);
+                        row.appendChild(dateCell);
+                        row.appendChild(actionsCell);
+                        
+                        tbody.appendChild(row);
+                    });
+                });
+        }
+
+        function loadAdminWithdrawals() {
+            db.collection('withdrawals')
+                .orderBy('date', 'desc')
+                .get()
+                .then((querySnapshot) => {
+                    const tbody = document.getElementById('withdrawals-table-body');
+                    tbody.innerHTML = '';
+                    
+                    querySnapshot.forEach((doc) => {
+                        const withdrawal = doc.data();
+                        const row = document.createElement('tr');
+                        
+                        const userCell = document.createElement('td');
+                        userCell.textContent = withdrawal.email;
+                        
+                        const amountCell = document.createElement('td');
+                        amountCell.textContent = withdrawal.amount.toFixed(2);
+                        
+                        const methodCell = document.createElement('td');
+                        methodCell.textContent = withdrawal.method;
+                        
+                        const statusCell = document.createElement('td');
+                        statusCell.textContent = withdrawal.status;
+                        
+                        const dateCell = document.createElement('td');
+                        dateCell.textContent = withdrawal.date.toDate().toLocaleString();
+                        
+                        const actionsCell = document.createElement('td');
+                        
+                        if (withdrawal.status === 'pending') {
+                            const completeBtn = document.createElement('button');
+                            completeBtn.textContent = 'Complete';
+                            completeBtn.onclick = () => {
+                                db.collection('withdrawals').doc(doc.id).update({
+                                    status: 'completed'
+                                });
+                                
+                                // Update user total withdrawals
+                                db.collection('users').doc(withdrawal.userId).get().then((userDoc) => {
+                                    const user = userDoc.data();
+                                    db.collection('users').doc(withdrawal.userId).update({
+                                        totalWithdrawals: user.totalWithdrawals + withdrawal.amount
+                                    });
+                                });
+                                
+                                showNotification('Withdrawal completed for ' + withdrawal.email);
+                            };
+                            
+                            actionsCell.appendChild(completeBtn);
+                        } else {
+                            actionsCell.textContent = 'Completed';
+                        }
+                        
+                        row.appendChild(userCell);
+                        row.appendChild(amountCell);
+                        row.appendChild(methodCell);
+                        row.appendChild(statusCell);
+                        row.appendChild(dateCell);
+                        row.appendChild(actionsCell);
+                        
+                        tbody.appendChild(row);
+                    });
+                });
+        }
+
+        function loadAdminReferrals() {
+            db.collection('referrals')
+                .orderBy('createdAt', 'desc')
+                .get()
+                .then((querySnapshot) => {
+                    const tbody = document.getElementById('referrals-admin-table-body');
+                    tbody.innerHTML = '';
+                    
+                    querySnapshot.forEach((doc) => {
+                        const referral = doc.data();
+                        const row = document.createElement('tr');
+                        
+                        const referrerCell = document.createElement('td');
+                        referrerCell.textContent = referral.referrerCode;
+                        
+                        const newUserCell = document.createElement('td');
+                        newUserCell.textContent = referral.newUserEmail;
+                        
+                        const depositCell = document.createElement('td');
+                        // You would need to query deposits for this user
+                        depositCell.textContent = 'Check';
+                        
+                        const bonusCell = document.createElement('td');
+                        bonusCell.textContent = '30 TK';
+                        
+                        const statusCell = document.createElement('td');
+                        statusCell.textContent = referral.status;
+                        
+                        const actionsCell = document.createElement('td');
+                        
+                        if (referral.status === 'pending') {
+                            const approveBtn = document.createElement('button');
+                            approveBtn.textContent = 'Approve';
+                            approveBtn.onclick = () => {
+                                // Update referral status
+                                db.collection('referrals').doc(doc.id).update({
+                                    status: 'approved'
+                                });
+                                
+                                // Add bonus to referrer
+                                db.collection('users')
+                                    .where('referralCode', '==', referral.referrerCode)
+                                    .get()
+                                    .then((querySnapshot) => {
+                                        if (!querySnapshot.empty) {
+                                            const referrerId = querySnapshot.docs[0].id;
+                                            const referrerData = querySnapshot.docs[0].data();
+                                            
+                                            db.collection('users').doc(referrerId).update({
+                                                balance: referrerData.balance + 30
+                                            });
+                                            
+                                            showNotification('Referral bonus approved');
+                                        }
+                                    });
+                            };
+                            
+                            actionsCell.appendChild(approveBtn);
+                        } else {
+                            actionsCell.textContent = 'Completed';
+                        }
+                        
+                        row.appendChild(referrerCell);
+                        row.appendChild(newUserCell);
+                        row.appendChild(depositCell);
+                        row.appendChild(bonusCell);
+                        row.appendChild(statusCell);
+                        row.appendChild(actionsCell);
+                        
+                        tbody.appendChild(row);
+                    });
+                });
+        }
+
+        function loadAdminGames() {
+            rdb.ref('games/history').orderByChild('date').limitToLast(20).once('value').then((snapshot) => {
+                const games = snapshot.val();
+                const tbody = document.getElementById('games-table-body');
+                tbody.innerHTML = '';
+                
+                if (games) {
+                    Object.keys(games).forEach(key => {
+                        const game = games[key];
+                        const row = document.createElement('tr');
+                        
+                        const idCell = document.createElement('td');
+                        idCell.textContent = key.substring(0, 8);
+                        
+                        const multiplierCell = document.createElement('td');
+                        multiplierCell.textContent = game.multiplier.toFixed(2) + 'X';
+                        
+                        const statusCell = document.createElement('td');
+                        statusCell.textContent = game.status;
+                        
+                        const playersCell = document.createElement('td');
+                        playersCell.textContent = game.players ? Object.keys(game.players).length : 0;
+                        
+                        const betsCell = document.createElement('td');
+                        let totalBets = 0;
+                        if (game.players) {
+                            Object.keys(game.players).forEach(uid => {
+                                totalBets += game.players[uid].betAmount;
+                            });
+                        }
+                        betsCell.textContent = totalBets.toFixed(2);
+                        
+                        const dateCell = document.createElement('td');
+                        dateCell.textContent = new Date(game.date).toLocaleString();
+                        
+                        row.appendChild(idCell);
+                        row.appendChild(multiplierCell);
+                        row.appendChild(statusCell);
+                        row.appendChild(playersCell);
+                        row.appendChild(betsCell);
+                        row.appendChild(dateCell);
+                        
+                        tbody.appendChild(row);
+                    });
+                }
+            });
+        }
+
+        function loadAdminSettings() {
+            db.collection('settings').doc('system').get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const settings = doc.data();
+                        document.getElementById('min-bet').value = settings.minBet || 2;
+                        document.getElementById('max-bet').value = settings.maxBet || 50000;
+                        document.getElementById('min-withdraw').value = settings.minWithdraw || 100;
+                        document.getElementById('referral-bonus').value = settings.referralBonus || 30;
+                    }
+                });
+        }
+
+        function saveSettings() {
+            const minBet = parseFloat(document.getElementById('min-bet').value);
+            const maxBet = parseFloat(document.getElementById('max-bet').value);
+            const minWithdraw = parseFloat(document.getElementById('min-withdraw').value);
+            const referralBonus = parseFloat(document.getElementById('referral-bonus').value);
+            
+            db.collection('settings').doc('system').set({
+                minBet: minBet,
+                maxBet: maxBet,
+                minWithdraw: minWithdraw,
+                referralBonus: referralBonus
+            });
+            
+            showNotification('Settings saved successfully');
+        }
+
+        function generateNextGames() {
+            const games = [];
+            for (let i = 0; i < 10; i++) {
+                // Generate random multiplier between 1.2 and 10.0
+                const multiplier = 1.2 + Math.random() * 8.8;
+                games.push({
+                    multiplier: multiplier,
+                    status: 'pending',
+                    date: Date.now() + (i * 60000) // 1 minute apart
+                });
+            }
+            
+            rdb.ref('games/upcoming').set(games);
+            showNotification('Generated 10 upcoming games');
+        }
+
+        function startNewGameRound() {
+            rdb.ref('games/current').set({
+                status: 'waiting',
+                startTime: Date.now() + 15000 // Start in 15 seconds
+            });
+            
+            showNotification('New game round starting in 15 seconds');
+            document.getElementById('game-status').textContent = 'Current status: Starting new round';
+        }
+
+        // Utility functions
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Check for referral code in URL
+        function checkReferral() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+            
+            if (refCode) {
+                document.getElementById('referral-code').value = refCode;
+            }
+        }
+
+        // Initialize
+        showLogin();
+        checkReferral();
+        
+        // Check auth state
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                checkAdminStatus();
+                loadUserData();
+                
+                // Check if user was redirected after login
+                if (localStorage.getItem('aviator_user')) {
+                    const lastPage = JSON.parse(localStorage.getItem('aviator_last_page')) || 'dashboard';
+                    showPage(lastPage);
+                }
+            } else {
+                document.getElementById('auth-container').style.display = 'flex';
+                document.getElementById('main-container').style.display = 'none';
+                
+                // Check if user was logged in before
+                const savedUser = localStorage.getItem('aviator_user');
+                if (savedUser) {
+                    const userData = JSON.parse(savedUser);
+                    document.getElementById('login-email').value = userData.email;
+                }
+            }
+        });
+
+        // Save current page before refresh
+        window.addEventListener('beforeunload', () => {
+            if (currentUser && pageHistory.length > 0) {
+                localStorage.setItem('aviator_last_page', pageHistory[pageHistory.length - 1]);
+            }
+        });
+    </script>
 </body>
 </html>
